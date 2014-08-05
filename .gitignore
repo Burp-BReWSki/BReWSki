@@ -1,4 +1,4 @@
-/dist/
 /build/
 /nbproject/private/
-/img/Thumbs.db
+Thumbs.db
+.DS_Store
