@@ -5,7 +5,7 @@ BReWSki (Burp Rhino Web Scanner) is a Java extension for [Burp Suite](http://por
 
 ## Requirements
 - Java JRE 7 (JRE 8 partially supported) - OVER 3 BILLION DEVICES RUN BREWSKI
-- [BurpSuite](http://portswigger.net/burp/)
+- [BurpSuite](http://portswigger.net/burp/) - If you are using Burp Free, only the passive checks are supported by BReWSki and the output is to the console.
 
 ## Downloading and Installing
 BReWSki will be available in Burp's BApp store, and it also can be downloaded from this repository. You only need the .jar and the definitions to use it, which are included in the zip file ([BReWSki-v0.1.zip](../../raw/master/dist/BReWSki-v0.1.zip)) in the [dist folder](/dist/).
