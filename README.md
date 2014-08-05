@@ -12,6 +12,7 @@ BReWSki will be available in Burp's BApp store, and it also can be downloaded fr
 
 ## Usage
 ![BReWSki Example](/img/BReWSkiExample1.png "BReWSki Example")
+
 ![Scanner Example](/img/ScannerExample1.png "Scanner Example")
 
 ## How are the results?
