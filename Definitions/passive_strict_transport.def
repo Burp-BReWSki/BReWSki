@@ -1,0 +1,37 @@
+var name = "Strict Transport Security Header Missing";
+var description = "This check notifies when a HTTPS server has not set the Strict Transport Security header (HSTS)";
+var detail = "The server response is lacking the HSTS header. The HSTS header allows the web server to instruct the browser\
+to to only access the server using a secure (HTTPS) connection.";
+var remediation = "The server should send the following header:\r \
+\"Strict-Transport-Security: max-age=31536000\"\r \
+";
+var type = "Passive";
+var severity = "Low";
+var confidence = "Certain";
+var requestMarkers = [0,0];
+var responseMarkers = [0,0];
+var output = "";
+var result = false;
+
+
+    function test(input_string,url){
+        if(url.indexOf("https://")===0){
+            var search_string = 'Strict-Transport-Security:';
+            if(input_string.search(search_string) !== -1){
+                return false;
+            }
+            //if we did not find it
+            return true;
+        }
+        //if not HTTPS, no STS needed
+        return false;
+    }
+
+try{
+    result = test(response,url);
+}
+catch(err)
+{
+    result = false;
+    output += "\n" + name + " - Error: " + err;
+}

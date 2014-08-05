@@ -1,0 +1,51 @@
+var name = "XML External Entity Expansion";
+var description = "This plugin checks for XXE";
+var detail = "A potential XXE attack has been found. Please review the results to determine if it was successful.";
+var remediation = "Do not allow expansion of user-supplied XML entities.";
+var severity = "High";
+var confidence = "Tentative";
+var type = "Active";
+var injection_value = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?> <!DOCTYPE test [ <!ENTITY % xxe SYSTEM "file:///some-non-existing.file" > %xxe; ]>';
+var requestMarkers = [];
+var responseMarkers = [];
+var output = "";
+var error = "";
+
+function addRequestMarkers(startindex, stopindex)
+{
+    if(startindex > -1 &&  stopindex > -1 && stopindex > startindex)
+        this.requestMarkers.push(Number(startindex), Number(stopindex));
+}
+
+function addResponseMarkers(startindex, stopindex)
+{
+    if(startindex > -1 &&  stopindex > -1 && stopindex > startindex)
+        this.responseMarkers.push(Number(startindex), Number(stopindex));
+}
+
+function test(request, response){
+    result = false;
+    re = /Exception|FileNotFoundException|some-non-existing\.file/gmi;
+
+    while (m = re.exec(response)) {
+        addResponseMarkers((m.index), (m.index + m.valueOf().toString().length));
+        result = true;
+    }
+    if(result == true)
+    {
+        output += "adding: " + request.indexOf(injection_value) + " and " + (request.indexOf(injection_value) + injection_value.length);
+        addRequestMarkers(request.indexOf(injection_value), (request.indexOf(injection_value) + injection_value.length) );
+    }
+
+    return result;
+}
+
+try{
+    result = test(request, response);
+    
+}
+catch(err)
+{
+    result = false;
+    output += "\n" + name + " - Error: " + err;
+}

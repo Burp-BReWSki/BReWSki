@@ -1,0 +1,52 @@
+var name = "Checks for vulnerable instances of OpenSSL";
+var description = "This checks version numbers in responses for vulnerable versions of OpenSSL";
+var detail = "The server response contains version information for OpenSSL.\
+ The observed version is between 1.0.1a and 1.0.1f which are known to be vulnerable to the Heartbleed vulnerability.\r \
+ The server was observed running the following version: \r";
+var remediation = "The server should update the installed version of OpenSSL to the latest version.";
+var type = "Passive";
+var severity = "High";
+var confidence = "Certain";
+var requestMarkers = [0,0];
+var responseMarkers = [0,0];
+var output = "";
+var result = false;
+
+function addResponseMarkers(startindex, stopindex)
+{
+    if(startindex > -1 &&  stopindex > -1 && stopindex > startindex)
+        this.responseMarkers.push(Number(startindex), Number(stopindex));
+}
+
+    function test(input_string){
+            var search_string = 'OpenSSL/1.0.1';
+            if(input_string.search(search_string) !== -1){
+                //found OpenSSL/1.0.1, check for affected versions
+                var version = input_string.substr((input_string.search(search_string)+search_string.length),1)
+                //check for a-f
+                if(version.charCodeAt(0) >= 97 && version.charCodeAt(0) < 103){
+                    detail += search_string+version;
+                    addResponseMarkers(input_string.search(search_string),input_string.search(search_string)+search_string.length+1);
+                    output += version;
+                    return true;
+                }
+                //if the version is not listed but it is 1.0.1, flag as uncertain
+                confidence = "Tentative";
+                detail += search_string+version;
+                addResponseMarkers(input_string.search(search_string),input_string.search(search_string)+search_string.length+1);
+                output += version;
+                return true;
+                
+            }
+            //if we did not find it
+            return false;
+    }
+
+try{
+    result = test(response);
+}
+catch(err)
+{
+    result = false;
+    output += "\n"  + " - Error: " + err;
+}

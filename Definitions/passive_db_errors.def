@@ -1,0 +1,167 @@
+//Author: Bucky Spires
+var name = "Database Error Message";
+var description = "This checks to see if the server response contains a known database error message";
+var detail = "The server responded with a common database error message that may expose the database type, database column or table names, or actual data. This can be leveraged in attacks against the database, such as SQL injection.";
+var type = "Passive";
+var severity = "Low";
+var confidence = "Certain";
+var output = "";
+var requestMarkers = [];
+var responseMarkers = [];
+var responseBodyOffset = 0;
+
+function addRequestMarkers(startindex, stopindex)
+{
+    this.requestMarkers.push(Number(startindex), Number(stopindex));
+}
+
+function addResponseMarkers(startindex, stopindex)
+{
+    this.responseMarkers.push(Number(startindex), Number(stopindex));
+}
+
+function getResponseBody(response)
+{
+    this.responseBodyOffset = response.indexOf("\r\n\r\n")+4;
+    return response.slice(response.indexOf("\r\n\r\n")+4, response.length);
+}
+
+// Microsoft SQL Server Check
+function test_MSSQL(input_string){
+    var re = /Error\sconverting\sdata\stype\svarchar\sto\snumeric|Incorrect\ssyntax\snear|SQL\sServer\sDriver\]\[SQL\sServer|ODBC\sSQL\sServer/g;
+    var result = false;
+    while (m = re.exec(response)) {
+        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        result = true;
+    }
+    return result;
+}
+
+// Oracle Check
+function test_ORA(input_string){
+    var re = /ORA\-0|ORA\-1|Oracle\sDB2|Oracle\sDriver|Oracle\sError|Oracle\sODBC|JDBC\sOracle|ODBC\sOracle/g;
+    var result = false;
+    while (m = re.exec(response)) {
+        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        result = true;
+    }
+    return result;
+}
+
+// MySQL Check
+function test_MySQL(response){
+    var re = /Can\'t\sconnect\sto\slocal|MySQL\sDriver|MySQL\sError|MySQL\sODBC|mySQL\serror\swith\squery|mysql\serror|on\sMySQL\sresult\sindex|supplied\sargument\sis\snot\sa\svalid\sMySQL\sresult\sresource|JDBC\sMySQL|Warning:\smysql_query\(\)/g;
+    var result = false;
+    while (m = re.exec(response)) {
+        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        result = true;
+    }
+    return result;
+}
+
+// Informix Check
+function test_Informix(input_string){
+    var re = /A\ssyntax\serror\shas\soccurred|An\sillegal\scharacter\shas\sbeen\sfound\sin\sthe\sstatement/g;
+    var result = false;
+    while (m = re.exec(response)) {
+        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        result = true;
+    }
+    return result;
+}
+
+// DB2 Check
+function test_DB2(input_string){
+    var re = /An\sunexpected\stoken\s\"END\-OF\-STATEMENT\"\swas\sfound|CLI\sDriver|DB2\sDriver|DB2\sError|DB2\sODBC|ODBC\sDB2|detected\san\sinternal\serror.+\[IBM\]\[CLI\sDriver\]\[DB2\//g;
+    var result = false;
+    while (m = re.exec(response)) {
+        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        result = true;
+    }
+    return result;
+}
+
+// PostgreSQL Check
+function test_PostgreSQL(input_string){
+    var re = /PostgreSQL\squery\sfailed:\sERROR|Supplied\sargument\sis\snot\sa\svalid\sPostgreSQL\sresult|Warning:\spg_connect\(\):\sUnable\sto\sconnect\sto\sPostgreSQL\sserver:\sFATAL/g;
+    var result = false;
+    while (m = re.exec(response)) {
+        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        result = true;
+    }
+    return result;
+}
+
+// MS Access Check
+function test_Access(input_string){
+    var re = /ADODB\.Field\serror|Microsoft\sOLE\sDB\sProvider\sfor\sODBC\sDrivers|ODBC\sMicrosoft\sAccess/g;
+    var result = false;
+    while (m = re.exec(response)) {
+        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        result = true;
+    }
+    return result;
+}
+
+// Unidentified Error Check
+function test_Unidentified(input_string){
+    var re = /JDBC\sDriver|JDBC\sError|JDBC\sSQL|ODBC\sDriver|ODBC\sError|ODBC\sSQL/g;
+    var result = false;
+    while (m = re.exec(response)) {
+        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        result = true;
+    }
+    return result;
+}
+
+try{
+    
+    response_body = getResponseBody(response);
+    
+    result = false;
+    if (test_MSSQL(response_body))
+    {
+    		result = true;
+    		detail += "<br /><br />The database type appears to be <b>MS-SQL Server</b>.";
+    }
+    else if (test_ORA(response_body))
+    {
+    		result = true;
+    		detail += "<br /><br />The database type appears to be <b>Oracle</b>.";
+    }
+    else if (test_MySQL(response_body))
+    {
+    		result = true;
+    		detail += "<br /><br />The database type appears to be <b>MySQL</b>.";
+    }
+    else if (test_Informix(response_body))
+    {
+    		result = true;
+    		detail += "<br /><br />The database type appears to be <b>Informix</b>.";
+    }
+    else if (test_DB2(response_body))
+    {
+    		result = true;
+    		detail += "<br /><br />The database type appears to be <b>DB2</b>.";
+    }
+    else if (test_PostgreSQL(response_body))
+    {
+    		result = true;
+    		detail += "<br /><br />The database type appears to be <b>PostgreSQL</b>.";
+    }
+    else if (test_Access(response_body))
+    {
+    		result = true;
+    		detail += "<br /><br />The database type appears to be <b>MS Access</b>.";
+    }
+    else if (test_Unidentified(response_body))
+    {
+    		result = true;
+    		detail += "<br /><br />The database type appears to be <b>Unidentified</b>.";
+    }
+}
+catch(err)
+{
+    result = false;
+    output += "\n" + name + " - Error: " + err;
+}

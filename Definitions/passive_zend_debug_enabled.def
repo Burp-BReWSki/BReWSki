@@ -1,0 +1,26 @@
+var name = "PHP Zend Debugger Check";
+var detail = "PHP Zend Debugger is enabled";
+var description = "This plugin passively checks for the existence of the Zend PHP Debugger";
+var type = "Passive";
+var severity = "High";
+var confidence = "Certain";
+var requestMarkers = [0,0];
+var responseMarkers = [0,0];
+
+
+    function test(input_string){
+        var search_string = 'ZDEDebuggerPresent';
+        if(input_string.search(search_string) != -1){
+            return true;
+        }
+        return false;
+    }
+
+try{
+    result = test(response);
+}
+catch(err)
+{
+    result = false;
+    output += "\n" + name + " - Error: " + err;
+}

@@ -1,0 +1,33 @@
+//this file has useful helper functions for building a definition
+
+var name = "Insertion Point Test"; //Name of scan check
+var description = "Inserts insertion point at a fixed location";//this describes the check
+var detail = ""; //this is the finding's actual detail when it's found by the scanner
+var type = "InsertionPoint"; //Passive or Active
+var output = "";
+var error = "";
+var insertionPoints = [];// = [60, 80];//just a random spot
+var baseValue = [];// = ["AAAA"];//just a random value
+
+
+function addInsertionPoint(baseValue, startIndex, stopIndex)
+{
+    this.insertionPoints.push(Number(startIndex), Number(stopIndex));
+    this.baseValue.push(baseValue);
+}
+
+try{
+    //matches INJECTIONMATCHHERE - a place holder, but can be used
+    re = /INJECTIONMATCHHERE/gmi;
+    
+    while (m = re.exec(request)) {
+        output += "\nadding " + name;
+        addInsertionPoint(m.valueOf().toString(), m.index, m.index + m.valueOf().toString().length); 
+    }
+    result = true;
+}
+catch(err)
+{
+    result = false;
+    output += "\n" + name + " - Error: " + err;
+}

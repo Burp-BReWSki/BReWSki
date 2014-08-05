@@ -1,0 +1,142 @@
+//this file has useful helper functions for building a definition
+
+var name = "Empty Definition"; //Name of scan check
+var description = "For example purposes only";//this describes the check
+var detail = ""; //this is the finding's actual detail when it's found by the scanner
+var type = "Passive"; //Passive or Active
+var severity = "High"; // Expected values are "High", "Medium", "Low", "Information" or "False positive".
+var background = ""; //Optional - describes the underlying issue
+var remediation = ""; //Optional - Describes remedation
+var confidence = "Certain";  // "Certain", "Firm" or "Tentative".
+var output = "";
+var error = "";
+
+//@param requestMarkers A list of index pairs representing the offsets of
+//markers to be applied to the request message. Each item in the list must
+//be an int[2] array containing the start and end offsets for the marker.
+//This parameter is optional and may be
+//<code>null</code> if no request markers are required.
+
+//@param responseMarkers A list of index pairs representing the offsets of
+//markers to be applied to the response message. Each item in the list must
+//be an int[2] array containing the start and end offsets for the marker.
+//This parameter is optional and may be
+//<code>null</code> if no response markers are required.
+//@return An object that implements the
+//<code>IHttpRequestResponseWithMarkers</code> interface.
+
+//base64 functions
+var keyStr = "ABCDEFGHIJKLMNOP" +
+		   "QRSTUVWXYZabcdef" +
+		   "ghijklmnopqrstuv" +
+		   "wxyz0123456789+/" +
+		   "=";
+
+
+function encode64(input) {
+ input = escape(input);
+ var result = "";
+ var chr1, chr2, chr3 = "";
+ var enc1, enc2, enc3, enc4 = "";
+ var i = 0;
+
+ do {
+	chr1 = input.charCodeAt(i++);
+	chr2 = input.charCodeAt(i++);
+	chr3 = input.charCodeAt(i++);
+
+	enc1 = chr1 >> 2;
+	enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+	enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+	enc4 = chr3 & 63;
+
+	if (isNaN(chr2)) {
+	   enc3 = enc4 = 64;
+	} else if (isNaN(chr3)) {
+	   enc4 = 64;
+	}
+        
+	result = result +
+	   keyStr.charAt(enc1) +
+	   keyStr.charAt(enc2) +
+	   keyStr.charAt(enc3) +
+	   keyStr.charAt(enc4);
+	chr1 = chr2 = chr3 = "";
+	enc1 = enc2 = enc3 = enc4 = "";
+ } while (i < input.length);
+
+ return result;
+}
+
+function decode64(input) {
+ var result = "";
+ var chr1, chr2, chr3 = "";
+ var enc1, enc2, enc3, enc4 = "";
+ var i = 0;
+
+ // remove all characters that are not A-Z, a-z, 0-9, +, /, or =
+ var base64test = /[^A-Za-z0-9\+\/\=]/g;
+ /*if (base64test.exec(input)) {
+	alert("There were invalid base64 characters in the input text.\n" +
+		  "Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" +
+		  "Expect errors in decoding.");
+ }*/
+ input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+
+ do {
+	enc1 = keyStr.indexOf(input.charAt(i++));
+	enc2 = keyStr.indexOf(input.charAt(i++));
+	enc3 = keyStr.indexOf(input.charAt(i++));
+	enc4 = keyStr.indexOf(input.charAt(i++));
+
+	chr1 = (enc1 << 2) | (enc2 >> 4);
+	chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+	chr3 = ((enc3 & 3) << 6) | enc4;
+
+	result = result + String.fromCharCode(chr1);
+
+	if (enc3 != 64) {
+	   result = result + String.fromCharCode(chr2);
+	}
+	if (enc4 != 64) {
+	   result = result + String.fromCharCode(chr3);
+	}
+
+	chr1 = chr2 = chr3 = "";
+	enc1 = enc2 = enc3 = enc4 = "";
+
+ } while (i < input.length);
+
+ return unescape(result);
+}
+
+function urlsafeb64decode(base64) {
+  
+    base64 = base64.substring(base64, base64.length-1);
+    // Add removed at end '='
+    base64 += Array(5 - base64.length % 4).join('=');
+    base64 = base64.replace(/\-/g, '+').replace(/\_/g, '/');
+    base64 = decode64(base64);
+    return base64;
+}
+
+
+function getResponseBody(response)
+{
+    return response.slice(response.indexOf("\r\n\r\n")+4, response.length);
+}
+
+function test(respone){//this is the function that does the check -- Implement your check here
+        return false;
+    
+}
+
+try{
+    //response_body = getResponseBody(response);
+    result = test(response);
+}
+catch(err)
+{
+    result = false;
+    output += "\n" + name + " - Error: " + err;
+}

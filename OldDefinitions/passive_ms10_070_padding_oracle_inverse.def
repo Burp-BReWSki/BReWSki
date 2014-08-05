@@ -1,0 +1,53 @@
+var name = "MS10-070 - Padding Oracle Inverse";
+var desccription = "This checks to see if the server is vulnerable to the padding oracle.";
+var detail = "The server is vulnerable to the padding oracle.";
+var type = "Passive";
+var severity = "High";
+var confidence = "Certain";
+var output = "overwritten";
+
+
+
+function urlsafeb64decode(base64) {
+
+  base64 = base64.substring(base64, base64.length-1);
+  // Add removed at end '='
+  base64 += Array(5 - base64.length % 4).join('=');
+  base64 = base64.replace(/\-/g, '+').replace(/\_/g, '/');
+  base64 = atob(base64);
+  return base64;
+};
+
+function test(input_string){
+	indexofd = input_string.indexOf(".axd?d=");
+    if(indexofd != -1)
+	{
+		indexofd += 7;
+		indexofamp = input_string.indexOf("&", indexofd);
+		indexofquote = input_string.indexOf('"', indexofd);
+		if (indexofamp < indexofquote)
+		{
+			dvalue = input_string.substring(indexofd, indexofamp);
+		}
+		else
+		{
+			dvalue = input_string.substring(indexofd, indexofquote);
+		}
+		dvalue = urlsafeb64decode(dvalue);
+		if (dvalue.length % 8 == 0)
+			return false;
+		else
+			return true;
+	}
+    else
+        return true;
+
+}
+
+try{
+    result = test(response_body);
+}
+catch(err)
+{
+    output += "\n" + name + " - Error: ";
+}

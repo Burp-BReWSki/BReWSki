@@ -1,0 +1,281 @@
+Test Checks to Implement:
+Active:
+  Tomcat Manager - request a URL and inspect response/body
+  JMX-Console - request a URL and inspect response/body
+  couchDB - request "/_all_dbs"
+  short name path disclosure check (possible?)
+
+Passive
+  bigip cookie check (and decoder)
+  couchDB (get welcome msg) - response contains {"couchdb":"Welcome"
+  couchDB - Server header contains counchdb - Server: CouchDB
+  Strict Transport Security
+  Take good checks out of other burp extensions
+
+
+
+Future Features (scanner extender)
+    Burp is encoding responses, against it's documentation
+    Make table better (sorting, moving columns, editor, etc.)
+    Sync scanner plugins online
+    Get “load from URL” hooked up (as opposed to load from disk)
+    Add a text area to the scan control tab that shows the source of the selected definition
+    Allow editing of a definition from burp with the option to save to disk or modify it in memory only (changes would be lost on close)
+    -Add "Load from online database" button
+    -get /getitems
+    -Response: [{javascript to json}]
+    -Store default plugins in subfolder of dir as scannerextender.jar
+    Extend Burp to modify reqs/responses with python/js
+    Extend Burp with export site tree functionality
+    Extend Burp with burp plugin autosync functionality
+    Extend Burp with “which cookies are authentication cookies”
+    Log straight in our tab
+    
+
+Future Features (beyond active/passive scanning)
+    JS Payload generator
+    --Mutator:  Mutate BA1+ACBX+45570
+
+Bugs
+-<Enter> on partial paths in file open don't work expand the folder.  E.g., C:\apps\ <enter> doesn't expand, it selects.  Maybe this is normal when searching the folders as we are (for .defs).  Maybe not close the browser if no .defs are found?
+
+More Check ideas: http://www.acunetix.com/vulnerabilities/
+    Built In Checks (do not duplicate):
+    Issue Name  Type ID
+    OS command injection  1048832
+    SQL injection 1049088
+    ASP.NET tracing enabled 1049216
+    File path traversal 1049344
+    XML external entity injection 1049600
+    LDAP injection  1049856
+    XPath injection 1050112
+    XML injection 1050368
+    ASP.NET debugging enabled 1050624
+    HTTP PUT enabled  1050880
+    Remote file inclusion 1051136
+    Cross-site scripting (stored) 2097408
+    HTTP header injection 2097664
+    Cross-site scripting (reflected)  2097920
+    Flash cross-domain policy 2098176
+    Silverlight cross-domain policy 2098432
+    HTML5 cross-origin resource sharing 2098688
+    Cleartext submission of password  3145984
+    Referer-dependent response  4194560
+    X-Forwarded-For dependent response  4194576
+    User agent-dependent response 4194592
+    Password returned in later response 4194816
+    Password field submitted using GET method       4195072
+    Password returned in URL query string 4195328
+    SQL statement in request parameter  4195456
+    Cross-domain POST 4195584
+    ASP.NET ViewState without MAC enabled 4195840
+    XML entity expansion  4196096
+    Long redirection response 4196352
+    Open redirection  5243136
+    SSL cookie without secure flag set  5243392
+    Cookie scoped to parent domain  5243648
+    Cross-domain Referer leakage  5243904
+    Cross-domain script include 5244160
+    Cookie without HttpOnly flag set  5244416
+    Session token in URL  5244672
+    Password field with autocomplete enabled  5244928
+    Password value set in cookie  5245184
+    File upload functionality 5245312
+    Frameable response (potential Clickjacking) 5245344
+    Browser cross-site scripting filter disabled  5245360
+    TRACE method is enabled 5245440
+    Database connection string disclosed  6291584
+    Source code disclosure  6291632
+    Directory listing 6291712
+    Email addresses disclosed 6291968
+    Private IP addresses disclosed  6292224
+    Social security numbers disclosed 6292480
+    Credit card numbers disclosed 6292736
+    Robots.txt file 6292992
+    Cacheable HTTPS response  7340288
+    Base64-encoded data in parameter  7340544
+    Multiple content types specified  8388864
+    HTML does not specify charset 8389120
+    HTML uses unrecognized charset  8389376
+    Content type incorrectly stated 8389632
+    Content type is not specified 8389888
+    SSL certificate 16777472
+    Extension-generated issue 134217728
+
+BUGS:
+Old bug - no longer appears to be true - There is a bug where if only one scan extension is loaded it will not get executed.
+
+-----EVERYTHING BELOW THIS LINE APPEARS TO BE JUST NOTES, NOT "TODO"-----
+
+Types:
+  Active Scan
+  Passive Scan
+
+
+Passive Check Locations:
+  Response Headers
+  Response Body
+  Request Headers
+  Request Body
+  Request Parameters
+
+
+Active Scan Workflow:
+    Need to look where we are injecting into (check location)
+    Scan definitions will have to be able to define a location they are for
+    or convey they are good for ANY scan location 
+
+Active Check Locations: (from burp API)
+    static final byte INS_PARAM_URL = 0x00;
+    /**
+     * Used to indicate where the payload is inserted into the value of a body
+     * parameter.
+     */
+    static final byte INS_PARAM_BODY = 0x01;
+    /**
+     * Used to indicate where the payload is inserted into the value of an HTTP
+     * cookie.
+     */
+    static final byte INS_PARAM_COOKIE = 0x02;
+    /**
+     * Used to indicate where the payload is inserted into the value of an item
+     * of data within an XML data structure.
+     */
+    static final byte INS_PARAM_XML = 0x03;
+    /**
+     * Used to indicate where the payload is inserted into the value of a tag
+     * attribute within an XML structure.
+     */
+    static final byte INS_PARAM_XML_ATTR = 0x04;
+    /**
+     * Used to indicate where the payload is inserted into the value of a
+     * parameter attribute within a multi-part message body (such as the name of
+     * an uploaded file).
+     */
+    static final byte INS_PARAM_MULTIPART_ATTR = 0x05;
+    /**
+     * Used to indicate where the payload is inserted into the value of an item
+     * of data within a JSON structure.
+     */
+    static final byte INS_PARAM_JSON = 0x06;
+    /**
+     * Used to indicate where the payload is inserted into the value of an AMF
+     * parameter.
+     */
+    static final byte INS_PARAM_AMF = 0x07;
+    /**
+     * Used to indicate where the payload is inserted into the value of an HTTP
+     * request header.
+     */
+    static final byte INS_HEADER = 0x20;
+    /**
+     * Used to indicate where the payload is inserted into a REST parameter
+     * within the URL file path.
+     */
+    static final byte INS_URL_REST = 0x21;
+    /**
+     * Used to indicate where the payload is inserted into the name of an added
+     * URL parameter.
+     */
+    static final byte INS_PARAM_NAME_URL = 0x22;
+    /**
+     * Used to indicate where the payload is inserted into the name of an added
+     * body parameter.
+     */
+    static final byte INS_PARAM_NAME_BODY = 0x23;
+    /**
+     * Used to indicate where the payload is inserted at a location manually
+     * configured by the user.
+     */
+    static final byte INS_USER_PROVIDED = 0x40;
+    /**
+     * Used to indicate where the insertion point is provided by an
+     * extension-registered
+     * <code>IScannerInsertionPointProvider</code>.
+     */
+    static final byte INS_EXTENSION_PROVIDED = 0x41;
+    /**
+     * Used to indicate where the payload is inserted at an unknown location
+     * within the request.
+     */
+    static final byte INS_UNKNOWN = 0x7f;
+
+
+
+
+
+
+Passive Definition Properties:
+
+        name - part of the definition - thsi is the name of the issue
+        detail - part of the definition - this is the details of why its an issue
+        severity - part of the definition - this is the severity of the issue
+        type - Active or Passive
+        confidence - part of the definition - this is how confident there is an issue
+        response_body - variable that contains the incoming response body
+        result - boolean variable that indicates if the check is true/false
+        requestMarkers - integer array consisting of a start position and end position for highlighting parts of the request
+        responseMarkers - integer array consisting of a start position and end position for highlighting parts of the response
+
+Example Passive Definition:
+
+    var name = "CouchDB Instance Found";
+    var detail = "An instance of CouchDB was found to be running on this server." +
+      "This test was confirmed by observing the following string the response body: " +
+      '{"couchdb":"Welcome"';
+
+    var severity = "High";
+    var confidence = "Certain";
+    var type = "Passive";
+    var requestMarkers = [0,0];
+    var responseMarkers = [0,0];
+
+
+    function test(input_string){
+    var search_string = '{"couchdb":"Welcome"';
+    if(input_string.search(search_string) != -1){
+      return true;
+    }
+    return false;
+    }
+
+    result = test(response_body);
+
+Active Definition Properties:
+
+        name - part of the definition - this is the name of the issue
+        detail - part of the definition - this is the details of why its an issue
+        severity - part of the definition - this is the severity of the issue
+        type - Active or Passive
+        confidence - part of the definition - this is how confident there is an issue
+        response_body - variable that contains the incoming response body after injection
+        injection_value - this is the value that is injected into a request
+        result - boolean variable that indicates if the check is true/false
+        requestMarkers - integer array consisting of a start position and end position for highlighting parts of the request
+        responseMarkers - integer array consisting of a start position and end position for highlighting parts of the response
+
+Example Active Definition:
+
+    var name = "Pipe Injection";
+    var detail = "Possible Pipe(|) Injection";
+
+    var severity = "High";
+    var confidence = "Certain";
+    var type = "Active";
+    var injection_value = "|";
+    var requestMarkers = [0,0];
+    var responseMarkers = [0,0];
+
+
+    function test(input_string){
+    var search_string = 'invalid pipe found';
+    if(input_string.search(search_string) != -1){
+      return true;
+    }
+    return false;
+    }
+
+    result = test(response_body);
+
+
+

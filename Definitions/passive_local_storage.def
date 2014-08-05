@@ -1,0 +1,50 @@
+var name = "HTML5 Storage Check";
+var detail = "The usage of client-side storage was found.";
+var description = "This plugin checks for the use of client-side storage.";
+var background = "The application appears to be using DOM based client storage. Sensitive data may be stored within this database and should be inspected manually.";
+//var remediation = "";
+var severity = "Information";
+var confidence = "Certain";
+var type = "Passive";
+var requestMarkers = [0,0];
+var responseMarkers = [0,0];
+
+    function findAll(input,search_string){
+        var found=[0,0];
+        var done = 0;
+
+        done = input.indexOf(search_string,done);
+        while(done != -1){
+            if(done >= 0){
+                responseMarkers.push(Number(done),Number(done+search_string.length));
+                 }
+            done = input.indexOf(search_string,done+1);
+        }
+        return found;
+    
+
+    }
+
+    function test(input_string){
+        var found = false;
+        if(input_string.search('sessionStorage.') != -1){
+           findAll(input_string,'sessionStorage.'); 
+            found = true;
+        }
+        if(input_string.search('localStorage.') != -1){
+          findAll(input_string,'localStorage.');
+            found = true;
+        }
+        //make sure our response markers are in order
+        responseMarkers.sort();
+        return found;
+    }
+
+    try{
+        result = test(response);
+    }
+    catch(err)
+    {
+        result = false;
+        output += "\n" + name + " - Error: " + err;
+    }

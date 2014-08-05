@@ -1,0 +1,32 @@
+var name = "Overly Long Response";
+var description = "This checks to see if the server responds with too many characters";
+var detail = "The server response was more than 300 characters, nothing requires that many characters.";
+var type = "Passive";
+var severity = "Low";
+var confidence = "Certain";
+var requestMarkers = [0,10];
+var responseMarkers = [0,10];
+
+
+function test(input_string){ 
+    if(input_string.length>=300)
+    {
+            this.requestMarkers = [];//[0,0];
+            this.responseMarkers = [300,Number(input_string.length)]; //need to cast this for some reason
+            
+            return true;
+    }
+    else
+            return false;
+
+}
+
+try{
+    result = test(response);
+    //output = "passive 300 complete";
+}
+catch(err)
+{
+    result = false;
+    output += "\n" + name + " - Error: " + err;
+}

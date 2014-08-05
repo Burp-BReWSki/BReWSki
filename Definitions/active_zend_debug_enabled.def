@@ -1,0 +1,28 @@
+var name = "PHP Zend Debugger Check";
+var detail = "PHP Zend Debugger is enabled";
+var description = "This plugin actively checks for the existence of the Zend PHP Debugger";
+var severity = "High";
+var confidence = "Certain";
+var type = "Active";
+//inject a cookie to an invalid host
+var injection_value = "start_debug=1;debug_host=abcd;";
+var requestMarkers = [];
+var responseMarkers = [];
+
+
+    function test(input_string){
+        var search_string = 'Cannot resolve host abcd';
+        if(input_string.search(search_string) != -1){
+            return true;
+        }
+        return false;
+    }
+
+    try{
+        result = test(response);
+    }
+catch(err)
+{
+    result = false;
+    output += "\n" + name + " - Error: " + err;
+}

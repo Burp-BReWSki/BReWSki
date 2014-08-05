@@ -1,0 +1,225 @@
+//this plugin checks to see if the first d value in the response is of a length which is believed to only only occur (false positive rate unknown) when vulnerable to padding oracle attacks.  
+//a non-vulnerable test page http://weblogs.asp.net/jeff/archive/2005/07/18/419842.aspx
+
+var name = "MS10-070 - Padding Oracle";
+var description = "This checks to see if the server is vulnerable to the MS10-070 padding oracle vuln.";
+var detail = "The server appears to be vulnerable to the ASP.NET padding oracle vulnerability. Exploitation of the vulnerability is unreliable, and does not always work on unpatched servers. This server is believed to be affected due to the lenght of the d value, a patched system may incidentally have a d value length which results in a false positive.";
+var remediation = "https://technet.microsoft.com/en-us/library/security/ms10-070.aspx";
+var type = "Passive";
+var severity = "High";
+var confidence = "Tentative";
+var output = "";
+var error = "";
+var requestMarkers = [];
+var responseMarkers = [];
+var responseBodyOffset = 0;
+
+function addRequestMarkers(startindex, stopindex)
+{
+    this.requestMarkers.push(Number(startindex), Number(stopindex));
+}
+
+function addResponseMarkers(startindex, stopindex)
+{
+    this.responseMarkers.push(Number(startindex), Number(stopindex));
+}
+
+//base64 encode / decode functions
+var keyStr = "ABCDEFGHIJKLMNOP" +
+		   "QRSTUVWXYZabcdef" +
+		   "ghijklmnopqrstuv" +
+		   "wxyz0123456789+/" +
+		   "=";
+
+function encode64(input) {
+ input = escape(input);
+ var result = "";
+ var chr1, chr2, chr3 = "";
+ var enc1, enc2, enc3, enc4 = "";
+ var i = 0;
+
+ do {
+	chr1 = input.charCodeAt(i++);
+	chr2 = input.charCodeAt(i++);
+	chr3 = input.charCodeAt(i++);
+
+	enc1 = chr1 >> 2;
+	enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+	enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+	enc4 = chr3 & 63;
+
+	if (isNaN(chr2)) {
+	   enc3 = enc4 = 64;
+	} else if (isNaN(chr3)) {
+	   enc4 = 64;
+	}
+        
+	result = result +
+	   keyStr.charAt(enc1) +
+	   keyStr.charAt(enc2) +
+	   keyStr.charAt(enc3) +
+	   keyStr.charAt(enc4);
+	chr1 = chr2 = chr3 = "";
+	enc1 = enc2 = enc3 = enc4 = "";
+ } while (i < input.length);
+
+ return result;
+}
+
+function decode64(input) {
+ var result = "";
+ var chr1, chr2, chr3 = "";
+ var enc1, enc2, enc3, enc4 = "";
+ var i = 0;
+
+ // remove all characters that are not A-Z, a-z, 0-9, +, /, or =
+ var base64test = /[^A-Za-z0-9\+\/\=]/g;
+ /*if (base64test.exec(input)) {
+	alert("There were invalid base64 characters in the input text.\n" +
+		  "Valid base64 characters are A-Z, a-z, 0-9, '+', '/',and '='\n" +
+		  "Expect errors in decoding.");
+ }*/
+ input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+
+ do {
+	enc1 = keyStr.indexOf(input.charAt(i++));
+	enc2 = keyStr.indexOf(input.charAt(i++));
+	enc3 = keyStr.indexOf(input.charAt(i++));
+	enc4 = keyStr.indexOf(input.charAt(i++));
+
+	chr1 = (enc1 << 2) | (enc2 >> 4);
+	chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+	chr3 = ((enc3 & 3) << 6) | enc4;
+
+	result = result + String.fromCharCode(chr1);
+
+	if (enc3 != 64) {
+	   result = result + String.fromCharCode(chr2);
+	}
+	if (enc4 != 64) {
+	   result = result + String.fromCharCode(chr3);
+	}
+
+	chr1 = chr2 = chr3 = "";
+	enc1 = enc2 = enc3 = enc4 = "";
+
+ } while (i < input.length);
+
+ return unescape(result);
+}
+
+
+function urlsafeb64decode(base64) {
+  
+    base64 = base64.substring(base64, base64.length-1);
+    // Add removed at end '='
+    base64 += Array(5 - base64.length % 4).join('=');
+    base64 = base64.replace(/\-/g, '+').replace(/\_/g, '/');
+    base64 = decode64(base64);
+    return base64;
+  
+}
+
+
+function getResponseBody(response)
+{
+    this.responseBodyOffset = response.indexOf("\r\n\r\n")+4;
+    return response.slice(response.indexOf("\r\n\r\n")+4, response.length);
+}
+
+
+function getIndicesOf(searchStr, str, caseSensitive) {
+    var startIndex = 0, searchStrLen = searchStr.length;
+    var index, indices = [];
+    if (!caseSensitive) {
+        str = str.toLowerCase();
+        searchStr = searchStr.toLowerCase();
+    }
+    while ((index = str.indexOf(searchStr, startIndex)) > -1) {
+        indices.push(index);
+        startIndex = index + searchStrLen;
+    }
+    return indices;
+}
+
+function test(input_string){
+    indexofd = input_string.indexOf(".axd?d=");
+    startIndex = 0;
+    
+    //indeciesofd = getIndicesOf(".axd?d=", )
+    
+    //if(indexofd !== -1)
+    //while(indexofd = input_string.indexOf(".axd?d=", startIndex) > -1)
+    while(indexofd > -1)
+    {
+            indexofd += 7;
+            startIndex = indexofd + 1;
+        
+            stopIndex = 0;
+            indexofamp = input_string.indexOf("&", indexofd);
+            indexofquote = input_string.indexOf('"', indexofd);
+            if( indexofquote == -1)
+            {
+                indexofquote = input_string.indexOf("'", indexofd);       
+            }
+            if (indexofamp < indexofquote && indexofamp != -1)
+            {
+                stopIndex = indexofamp;
+            }
+            else
+            {
+                stopIndex = indexofquote;
+            }
+            dvalue = input_string.substring(indexofd, stopIndex);
+            
+            //output += "\nDvalue: " + dvalue;
+            
+            dvalue = urlsafeb64decode(dvalue);
+            output += "\ndvalue length: " + dvalue.length;
+            if (dvalue.length % 8 === 0)
+            {
+                    output += "\ndvalue disible by 8 and likely vulnerable";
+                    
+                    addResponseMarkers(indexofd + this.responseBodyOffset, stopIndex + this.responseBodyOffset);
+                    //return true;
+            }
+            else
+            {   
+                output += "\ndvalue not vulnerable";
+                //return false;
+            }
+            indexofd = input_string.indexOf(".axd?d=", indexofd+1);
+	}
+    //else
+    //{
+        //output = "\ndid not find axd value";
+        //return false;
+    //}
+    
+    if(this.responseMarkers.length > 0)
+        return true;
+    else 
+        return false;
+    
+
+}
+
+try{
+    response_body = getResponseBody(response);
+    result = test(response_body);
+    
+   
+}
+catch(err)
+{
+    result = false;
+    output += "\n" + name + " - Error";
+    
+    var vDebug = ""; 
+    for (var prop in err) 
+    {  
+       vDebug += "property: "+ prop+ " value: ["+ err[prop]+ "]\n"; 
+    } 
+    vDebug += "toString(): " + " value: [" + err.toString() + "]"; 
+    output = vDebug; 
+}

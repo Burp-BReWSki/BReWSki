@@ -1,0 +1,27 @@
+var name = "Pipe Injection";
+var detail = "Possible Pipe(|) Injection";
+var description = "This checks for pipe injection";
+var severity = "High";
+var confidence = "Certain";
+var type = "Active";
+var injection_value = "|";
+var requestMarkers = [0,0];
+var responseMarkers = [0,0];
+
+
+    function test(input_string){
+        var search_string = 'invalid pipe found';
+        if(input_string.search(search_string) != -1){
+            return true;
+        }
+        return false;
+    }
+
+    try{
+        result = test(response);
+    }
+    catch(err)
+    {
+        result = false;
+        output += "\n" + name + " - Error: " + err;
+    }

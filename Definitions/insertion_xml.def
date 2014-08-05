@@ -1,0 +1,34 @@
+//this file has useful helper functions for building a definition
+
+var name = "XML Insertion Points"; //Name of scan check
+var description = "Inserts insertion points for XML";//this describes the check
+var detail = ""; //this is the finding's actual detail when it's found by the scanner
+var type = "InsertionPoint"; //Passive or Active
+var output = "";
+var error = "";
+var insertionPoints = [];// = [60, 80];//just a random spot
+var baseValue = [];// = ["AAAA"];
+
+
+function addInsertionPoint(baseValue, startIndex, stopIndex)
+{
+    this.insertionPoints.push(Number(startIndex), Number(stopIndex));
+    this.baseValue.push(baseValue);
+}
+
+try{
+    var result = false;
+    //matches <?xml version="1.0"?> - can be added onto
+    re = /<\?xml version="1\.0"\?>/gmi;
+    
+    while (m = re.exec(request)) {
+        output += "\nadding " + name;
+        addInsertionPoint(m.valueOf().toString(), m.index, m.index + m.valueOf().toString().length); 
+        result = true;
+    }
+}
+catch(err)
+{
+    result = false;
+    output += "\n" + name + " - Error: " + err;
+}
