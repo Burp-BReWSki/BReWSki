@@ -15,7 +15,7 @@ BReWSki will be available in Burp's BApp store, and it also can be downloaded fr
 ![Scanner Example](/img/ScannerExample1.png "Scanner Example")
 
 ## How are the results?
-Currently BReWSki checks provide tentative results that require more manual analysis. Some checks should never produce a false positive, and other checks will produce a high number of false positives.
+Currently BReWSki checks provide tentative results that require more manual analysis. Some checks should never produce a false positive, and other checks will produce a high number of false positives. 
 
 ## Security
 Scanner definition files have the same permissions as jar files and could compromise your machine.
