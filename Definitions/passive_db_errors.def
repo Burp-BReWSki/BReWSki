@@ -31,7 +31,7 @@ function test_MSSQL(input_string){
     var re = /Error\sconverting\sdata\stype\svarchar\sto\snumeric|Incorrect\ssyntax\snear|SQL\sServer\sDriver\]\[SQL\sServer|ODBC\sSQL\sServer/g;
     var result = false;
     while (m = re.exec(response)) {
-        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        addResponseMarkers((m.index ), (m.index + m.valueOf().toString().length));
         result = true;
     }
     return result;
@@ -42,7 +42,7 @@ function test_ORA(input_string){
     var re = /ORA\-0|ORA\-1|Oracle\sDB2|Oracle\sDriver|Oracle\sError|Oracle\sODBC|JDBC\sOracle|ODBC\sOracle/g;
     var result = false;
     while (m = re.exec(response)) {
-        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        addResponseMarkers((m.index ), (m.index + m.valueOf().toString().length));
         result = true;
     }
     return result;
@@ -53,7 +53,7 @@ function test_MySQL(response){
     var re = /Can\'t\sconnect\sto\slocal|MySQL\sDriver|MySQL\sError|MySQL\sODBC|mySQL\serror\swith\squery|mysql\serror|on\sMySQL\sresult\sindex|supplied\sargument\sis\snot\sa\svalid\sMySQL\sresult\sresource|JDBC\sMySQL|Warning:\smysql_query\(\)/g;
     var result = false;
     while (m = re.exec(response)) {
-        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        addResponseMarkers((m.index ), (m.index + m.valueOf().toString().length));
         result = true;
     }
     return result;
@@ -64,7 +64,7 @@ function test_Informix(input_string){
     var re = /A\ssyntax\serror\shas\soccurred|An\sillegal\scharacter\shas\sbeen\sfound\sin\sthe\sstatement/g;
     var result = false;
     while (m = re.exec(response)) {
-        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        addResponseMarkers((m.index ), (m.index + m.valueOf().toString().length));
         result = true;
     }
     return result;
@@ -75,7 +75,7 @@ function test_DB2(input_string){
     var re = /An\sunexpected\stoken\s\"END\-OF\-STATEMENT\"\swas\sfound|CLI\sDriver|DB2\sDriver|DB2\sError|DB2\sODBC|ODBC\sDB2|detected\san\sinternal\serror.+\[IBM\]\[CLI\sDriver\]\[DB2\//g;
     var result = false;
     while (m = re.exec(response)) {
-        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        addResponseMarkers((m.index ), (m.index + m.valueOf().toString().length));
         result = true;
     }
     return result;
@@ -86,7 +86,7 @@ function test_PostgreSQL(input_string){
     var re = /PostgreSQL\squery\sfailed:\sERROR|Supplied\sargument\sis\snot\sa\svalid\sPostgreSQL\sresult|Warning:\spg_connect\(\):\sUnable\sto\sconnect\sto\sPostgreSQL\sserver:\sFATAL/g;
     var result = false;
     while (m = re.exec(response)) {
-        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        addResponseMarkers((m.index ), (m.index + m.valueOf().toString().length));
         result = true;
     }
     return result;
@@ -97,7 +97,7 @@ function test_Access(input_string){
     var re = /ADODB\.Field\serror|Microsoft\sOLE\sDB\sProvider\sfor\sODBC\sDrivers|ODBC\sMicrosoft\sAccess/g;
     var result = false;
     while (m = re.exec(response)) {
-        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        addResponseMarkers((m.index ), (m.index + m.valueOf().toString().length));
         result = true;
     }
     return result;
@@ -108,7 +108,7 @@ function test_Unidentified(input_string){
     var re = /JDBC\sDriver|JDBC\sError|JDBC\sSQL|ODBC\sDriver|ODBC\sError|ODBC\sSQL/g;
     var result = false;
     while (m = re.exec(response)) {
-        addResponseMarkers((m.index + this.responseBodyOffset), (m.index + this.responseBodyOffset + m.valueOf().toString().length));
+        addResponseMarkers((m.index ), (m.index + m.valueOf().toString().length));
         result = true;
     }
     return result;
