@@ -17,7 +17,9 @@ var result = false;
     function test(input_string,url){
         if(url.indexOf("https://")===0){
             var search_string = 'Strict-Transport-Security:';
-            if(input_string.search(search_string) !== -1){
+            //split the string to only search the header portion
+            var headers = input_string.split('\r\n\r\n')[0];
+            if(headers.search(search_string) !== -1){
                 return false;
             }
             //if we did not find it
